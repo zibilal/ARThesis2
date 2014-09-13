@@ -57,7 +57,7 @@ public class GooglePlacesAPIDataSources implements DataSource{
             }
 
             @Override
-            public void onUpdate(Response response) {
+            public void onUpdate(Response response, String url) {
                 if(response != null) {
                     GooglePlacesJSONResponse jresponse = (GooglePlacesJSONResponse) response;
                     List<Geonames>  data = (List<Geonames>)jresponse.responseData();

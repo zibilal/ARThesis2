@@ -53,6 +53,13 @@ public class LowPassFilter {
         return previous;
     }
 
+    // contoh lain standard deviasi
+    // deteksi kecepatan perubahan data
+    // kalo std 0 , data tidak perubahan
+    // kalo tinggi , perubahan sangat tinggi
+    // kalo rendah (-) , cenderung rendah perubahannya.
+    // berbanding terbalik dengan standard deviasi.
+
     private static final float computeAlpha(float low, float high, float[] current, float[] previous) {
         if (previous.length != 3 || current.length != 3) return ALPHA_DEFAULT;
 

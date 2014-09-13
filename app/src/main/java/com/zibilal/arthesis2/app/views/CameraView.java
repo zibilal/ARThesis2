@@ -1,6 +1,7 @@
 package com.zibilal.arthesis2.app.views;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.view.SurfaceHolder;
@@ -59,18 +60,23 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback{
         Camera.Size bestSize = null;
         List<Camera.Size> sizeList = params.getSupportedPreviewSizes();
 
-        for(Camera.Size sz : sizeList) {
-            if(sz.width <= width && sz.height <= height) {
-                if(bestSize==null) {
-                    bestSize=sz;
-                } else {
-                    int resultArea = bestSize.width * bestSize.height;
-                    int newArea = sz.width * sz.height;
-                    if(newArea > resultArea) {
-                        bestSize=sz;
-                    }
+        float ff = (float) width / height;
+        float bff = 0f;
+
+        if(sizeList != null && sizeList.size() > 0) {
+            bestSize = sizeList.get(0);
+
+            for (Camera.Size sz : sizeList) {
+                float cff = (float) sz.width / sz.height;
+                if ((ff - cff <= ff - bff) && (sz.width <= width) && (sz.width >= bestSize.width)) {
+                    bff = cff;
+                    bestSize = sz;
                 }
             }
+        }
+
+        if(bestSize == null) {
+            bestSize = mCamera.new Size(480, 300);
         }
         return bestSize;
     }
