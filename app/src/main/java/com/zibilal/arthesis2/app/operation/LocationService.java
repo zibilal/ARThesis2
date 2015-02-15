@@ -118,7 +118,7 @@ public class LocationService implements GooglePlayServicesClient.ConnectionCallb
         }
     }
 
-    static class ErrorDialogFragment extends DialogFragment {
+    static public class ErrorDialogFragment extends DialogFragment {
         private Dialog mDialog;
 
         public ErrorDialogFragment() {

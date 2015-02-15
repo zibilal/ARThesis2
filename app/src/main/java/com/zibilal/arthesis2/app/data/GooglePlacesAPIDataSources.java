@@ -33,6 +33,7 @@ public class GooglePlacesAPIDataSources implements DataSource{
         markers = new ArrayList<Marker>();
     }
 
+    @Override
     public void createRequest(double lat, double lon, float radius) {
         StringBuilder urlBuilder = new StringBuilder(BASE_URL);
         urlBuilder.append(OUTPUT_JSON);
@@ -60,11 +61,11 @@ public class GooglePlacesAPIDataSources implements DataSource{
             public void onUpdate(Response response, String url) {
                 if(response != null) {
                     GooglePlacesJSONResponse jresponse = (GooglePlacesJSONResponse) response;
-                    List<Geonames>  data = (List<Geonames>)jresponse.responseData();
-                    for(Geonames g : data) {
-                        Geonames.Geometry geo = g.getGeometry();
+                    List<GooglePlace>  data = (List<GooglePlace>)jresponse.responseData();
+                    for(GooglePlace g : data) {
+                        GooglePlace.Geometry geo = g.getGeometry();
                         if(geo != null) {
-                            Geonames.Loc loc = geo.getLocation();
+                            GooglePlace.Loc loc = geo.getLocation();
                             if(loc != null) {
                                 Marker m = new Marker(g.getName(), loc.getLat(), loc.getLng(), 0d, 0d, Color.BLUE);
                                 Log.d(TAG, String.format("Name %s , Lat %f, Lng %f", m.getName(), m.getLatitude(), m.getLongitude()));

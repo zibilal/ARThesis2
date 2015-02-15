@@ -8,5 +8,7 @@
     <string name="title_activity_matrix_test">MatrixTestActivity</string>
     <string name="title_activity_google_places_apiautocomplete_test">GooglePlacesAPIAutocompleteTest</string>
     <string name="title_activity_camera_test">CameraTestActivity</string>
+    <string name="title_activity_sensor_date_test">SensorDateTest</string>
+    <string name="title_activity_low_pass_test">LowPassTestActivity</string>
 
 </resources>

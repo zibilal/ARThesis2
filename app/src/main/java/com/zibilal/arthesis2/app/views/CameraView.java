@@ -60,7 +60,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback{
         Camera.Size bestSize = null;
         List<Camera.Size> sizeList = params.getSupportedPreviewSizes();
 
-        float ff = (float) width / height;
+        /*float ff = (float) width / height;
         float bff = 0f;
 
         if(sizeList != null && sizeList.size() > 0) {
@@ -71,6 +71,20 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback{
                 if ((ff - cff <= ff - bff) && (sz.width <= width) && (sz.width >= bestSize.width)) {
                     bff = cff;
                     bestSize = sz;
+                }
+            }
+        }*/
+
+        for(Camera.Size sz : sizeList) {
+            if(sz.width <= width && sz.height <= height) {
+                if(bestSize==null) {
+                    bestSize=sz;
+                } else {
+                    int resultArea = bestSize.width * bestSize.height;
+                    int newArea = sz.width * sz.height;
+                    if(newArea > resultArea) {
+                        bestSize=sz;
+                    }
                 }
             }
         }

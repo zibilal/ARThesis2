@@ -12,7 +12,7 @@ public class GooglePlacesJSONResponse implements Response {
 
     @SerializedName("next_page_token")
     private String nextPageToken;
-    private List<Geonames> results;
+    private List<GooglePlace> results;
 
     public String getNextPageToken() {
         return nextPageToken;
@@ -22,11 +22,11 @@ public class GooglePlacesJSONResponse implements Response {
         this.nextPageToken = nextPageToken;
     }
 
-    public List<Geonames> getResults() {
+    public List<GooglePlace> getResults() {
         return results;
     }
 
-    public void setResults(List<Geonames> results) {
+    public void setResults(List<GooglePlace> results) {
         this.results = results;
     }
 

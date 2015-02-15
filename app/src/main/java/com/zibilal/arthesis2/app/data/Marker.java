@@ -142,7 +142,7 @@ public class Marker {
             float x = mLocationRelativePointOfView.getX();
             float y = mLocationRelativePointOfView.getY();
 
-            double angle = 2.0 * Math.atan2(10, mDistance);
+            double angle = 2.0 * Math.atan2(50, mDistance);
             float radius = (float) ( angle  * canvas.getHeight() );
             mPaintScreen.circle(canvas, x, y, radius);
             mPaintScreen.boxedText(canvas, mName, mName.length(), x, y, 0);

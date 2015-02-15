@@ -10,20 +10,26 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.FloatMath;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.zibilal.arthesis2.app.data.ARGlobal;
-import com.zibilal.arthesis2.app.data.GooglePlacesAPIDataSources;
+import com.zibilal.arthesis2.app.data.GeonamesDataSource;
+import com.zibilal.arthesis2.app.operation.FileWorker;
 import com.zibilal.arthesis2.app.operation.LocationService;
 import com.zibilal.arthesis2.app.operation.LowPassFilter;
 import com.zibilal.arthesis2.app.operation.Matrix;
 import com.zibilal.arthesis2.app.views.AugmentedView;
 import com.zibilal.arthesis2.app.views.CameraView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -56,7 +62,24 @@ public class ARActivity extends Activity implements SensorEventListener, Locatio
     private CameraView mCameraView;
     private AugmentedView mAugmentedView;
 
-    private GooglePlacesAPIDataSources mDataSources;
+    //private GooglePlacesAPIDataSources mDataSources;
+    private GeonamesDataSource mDataSources = new GeonamesDataSource();
+
+    private List<String> accellRawData = new ArrayList<String>();
+    private List<String> magnetRawData = new ArrayList<String>();
+    private List<String> accellFilteredData = new ArrayList<String>();
+    private List<String> magnetFilteredData = new ArrayList<String>();
+
+    private Handler handlerMessage = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            if(msg.what==FileWorker.WHAT_FILE_WORKER){
+                Toast.makeText(ARActivity.this, (String) msg.obj, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            return false;
+        }
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +99,6 @@ public class ARActivity extends Activity implements SensorEventListener, Locatio
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mSensorGravity = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensorMagnetic = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-
-        mDataSources = new GooglePlacesAPIDataSources();
     }
 
     @Override
@@ -136,6 +157,13 @@ public class ARActivity extends Activity implements SensorEventListener, Locatio
         mLocationService.stop();
         mSensorManager.unregisterListener(this);
         super.onStop();
+
+        FileWorker fileWorker = new FileWorker(handlerMessage);
+        fileWorker.setFileNames("accellraw.csv","accellfiltered.csv",
+                "magnetraw.csv","magnetfiltered.csv", "alphaingAccell.csv", "alphaingMagnet.csv");
+        fileWorker.saveData(accellRawData,accellFilteredData,
+                magnetRawData,magnetFilteredData, LowPassFilter.getDataAccell(),
+                LowPassFilter.getDataMagnet());
     }
 
     @Override
@@ -163,19 +191,31 @@ public class ARActivity extends Activity implements SensorEventListener, Locatio
         if(!computing.compareAndSet(false, true)) return;
 
         if(sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            mSmooth = LowPassFilter.filter(0.5f, 1.0f, sensorEvent.values, mGravity);
+            String msg1=String.format("%f,%f,%f\n",sensorEvent.values[0],sensorEvent.values[1],
+                    sensorEvent.values[2]);
+            accellRawData.add(msg1);
+            mSmooth = LowPassFilter.filter(0.5f, 1.0f, sensorEvent.values, mGravity, LowPassFilter.SENSOR_ACCELL);
             mGravity[0] = mSmooth[0];
             mGravity[1] = mSmooth[1];
             mGravity[2] = mSmooth[2];
+            String msg2=String.format("%f,%f,%f\n",mSmooth[0],mSmooth[1],mSmooth[2]);
+            accellFilteredData.add(msg2);
         } else if(sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            mSmooth = LowPassFilter.filter(2.0f, 4.0f, sensorEvent.values, mMagnetic);
+            String msg1=String.format("%f,%f,%f\n",sensorEvent.values[0],sensorEvent.values[1],
+                    sensorEvent.values[2]);
+            magnetRawData.add(msg1);
+            mSmooth = LowPassFilter.filter(2.0f, 4.0f, sensorEvent.values, mMagnetic, LowPassFilter.SENSOR_MAGNETIC);
             mMagnetic[0] = mSmooth[0];
             mMagnetic[1] = mSmooth[1];
             mMagnetic[2] = mSmooth[2];
+            String msg2=String.format("%f,%f,%f\n",mSmooth[0],mSmooth[1],mSmooth[2]);
+            magnetFilteredData.add(msg2);
         }
 
+        //SensorManager.getRotationMatrix(mRotation, null, mGravity, mMagnetic);
         SensorManager.getRotationMatrix(mTempRotation, null, mGravity, mMagnetic);
         SensorManager.remapCoordinateSystem(mTempRotation, SensorManager.AXIS_Y, SensorManager.AXIS_MINUS_Z, mRotation);
+        //SensorManager.remapCoordinateSystem(mTempRotation, SensorManager.AXIS_MINUS_Y, SensorManager.AXIS_MINUS_X, mRotation);
 
         mWorldMatrix.set(mRotation[0], mRotation[1], mRotation[2],
                 mRotation[3], mRotation[4], mRotation[5],
@@ -186,7 +226,7 @@ public class ARActivity extends Activity implements SensorEventListener, Locatio
 
         synchronized (mMagneticNorthCompensation) {
             mMagneticCompensatedMatrix.prod(mMagneticNorthCompensation);
-            Log.d(TAG, String.format("1. Magnetic compensted coord : %s", mMagneticCompensatedMatrix));
+            Log.d(TAG, String.format("1. Magnetic compensated coord : %s", mMagneticCompensatedMatrix));
         }
 
         // The compass assumes the screen is parallel to the ground with the screen pointing to the sky
@@ -196,20 +236,21 @@ public class ARActivity extends Activity implements SensorEventListener, Locatio
         Log.d(TAG, String.format("2. Magnetic compensated coord : %s", mMagneticCompensatedMatrix));
 
         // Cross product with the world coordinates to get a mag north compensated coords
-        Log.d(TAG, String.format(" World Coordingate : %s", mWorldMatrix));
+        Log.d(TAG, String.format(" World Coordinate : %s", mWorldMatrix));
         mMagneticCompensatedMatrix.prod(mWorldMatrix);
         Log.d(TAG, String.format("3. Magnetic compensated coord : %s", mMagneticCompensatedMatrix));
 
         // Y axis
         Log.d(TAG, String.format(" Y Axis Rotation : %s", yAxisRotation));
         mMagneticCompensatedMatrix.prod(yAxisRotation);
-        Log.d(TAG, String.format("4. Magnetic compansated coord : %s", mMagneticCompensatedMatrix));
+        Log.d(TAG, String.format("4. Magnetic compensated coord : %s", mMagneticCompensatedMatrix));
 
         // Invert the matrix since up-down and left-right are reversed in landscape mode
         mMagneticCompensatedMatrix.invert();
         Log.d(TAG, String.format("5. Magnetic compensated coord : %s", mMagneticCompensatedMatrix));
 
-        ARGlobal.setRotationMatrix(mMagneticCompensatedMatrix);
+        ARGlobal.setRotationMatrix(mWorldMatrix);
+        //ARGlobal.setRotationMatrix(mMagneticCompensatedMatrix);
 
         computing.set(false);
 
@@ -230,7 +271,7 @@ public class ARActivity extends Activity implements SensorEventListener, Locatio
     public void onCurrentLocation(Location location) {
         if(location != null) {
 
-            mDataSources.createRequest(location.getLatitude(), location.getLongitude(), 0.5f);
+            mDataSources.createRequest(location.getLatitude(), location.getLongitude(), 20f);
             mDataSources.fetchData();
 
             Log.d(TAG, String.format("----> current location =  Latitude:%.4f  Longitude:%.4f  Altitude:%.4f", location.getLatitude(), location.getLongitude(), location.getAltitude()));

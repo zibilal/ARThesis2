@@ -1,17 +1,11 @@
 package com.zibilal.arthesis2.app.operation;
 
 import android.util.FloatMath;
+import android.util.Log;
 
-/**
- * This class implements a low-pass filter. A low-pass filter is an electronic
- * filter that passes low-frequency signals but attenuates (reduces the
- * amplitude of) signals with frequencies higher than the cutoff frequency. The
- * actual amount of attenuation for each frequency varies from filter to filter.
- * It is sometimes called a high-cut filter, or treble cut filter when used in
- * audio applications.
- * 
- * @author Justin Wetherell (phishman3579@gmail.com)
- */
+import java.util.ArrayList;
+import java.util.List;
+
 public class LowPassFilter {
 
     /*
@@ -23,6 +17,14 @@ public class LowPassFilter {
     private static final float ALPHA_STEADY = 0.001f;
     private static final float ALPHA_START_MOVING = 0.1f;
     private static final float ALPHA_MOVING = 0.9f;
+
+    public static final String SENSOR_MAGNETIC="magnetic";
+    public static final String SENSOR_ACCELL="accell";
+
+    private static final String TAG="LowPassFilter";
+
+    private static List<String> dataAccell=new ArrayList<String>();
+    private static List<String> dataMagnet=new ArrayList<String>();
 
     private LowPassFilter() {
     }
@@ -39,18 +41,36 @@ public class LowPassFilter {
      *            float array to smooth.
      * @param previous
      *            float array representing the previous values.
+     * @param sensorName
      * @return float array smoothed with a low-pass filter.
      */
-    public static float[] filter(float low, float high, float[] current, float[] previous) {
+    public static float[] filter(float low, float high, float[] current, float[] previous, String sensorName) {
         if (current == null || previous == null) throw new NullPointerException("input and prev float arrays must be non-NULL");
         if (current.length != previous.length) throw new IllegalArgumentException("input and prev must be the same length");
 
         float alpha = computeAlpha(low, high, current, previous);
+        String msg = String.format("%f,%f,%f,%f,%f,%f,%f\n", alpha, current[0],
+                current[1],current[2],previous[0],previous[1],previous[2]);
+        if(sensorName != null && sensorName.length() > 0) {
+            if(sensorName.equals(SENSOR_ACCELL)){
+                dataAccell.add(msg);
+            }else if(sensorName.equals(SENSOR_MAGNETIC)){
+                dataMagnet.add(msg);
+            }
+        }
 
         for (int i = 0; i < current.length; i++) {
             previous[i] = previous[i] + alpha * (current[i] - previous[i]);
         }
         return previous;
+    }
+
+    public static List<String> getDataAccell(){
+        return dataAccell;
+    }
+
+    public static List<String> getDataMagnet(){
+        return dataMagnet;
     }
 
     // contoh lain standard deviasi

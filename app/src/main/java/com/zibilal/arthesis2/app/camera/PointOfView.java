@@ -29,11 +29,6 @@ public class PointOfView {
         this.mDistance=(mWidth / 2) / (float) Math.tan(mViewAngle / 2);
     }
 
-    public void setViewAngle(float viewAngle) {
-        mViewAngle=viewAngle;
-        mDistance=(mWidth / 2) / (float)  Math.tan(mViewAngle / 2);
-    }
-
     public void projectPoint(Vector input, Vector output ) {
         float[] temp1 = new float[3];
         float[] temp2 = new float[3];
@@ -47,23 +42,6 @@ public class PointOfView {
 
         temp2[0] = temp2[0] + mWidth / 2;
         temp2[1] = -temp2[1] + mHeight / 2;
-        Log.d(TAG, String.format("-- Output point = %.4f %.4f %.4f", temp2[0], temp2[1], temp2[2]));
-        output.set(temp2);
-    }
-
-    public void projectPoint(Vector input, com.zibilal.arthesis2.app.outside.Vector output ) {
-        float[] temp1 = new float[3];
-        float[] temp2 = new float[3];
-
-        input.get(temp1);
-        Log.d(TAG, String.format("\n\n-- Width : %d Height : %d ViewAngle : %.4f Distance : %.4f", mWidth, mHeight, mViewAngle, mDistance));
-        Log.d(TAG, String.format("-- Input point = %.4f %.4f %.4f", temp1[0], temp1[1], temp1[2]));
-        temp2[0] = (mDistance * temp1[0]) / -temp1[2];
-        temp2[1] = (mDistance * temp1[1]) / -temp1[2];
-        temp2[2] = temp1[2];
-
-        temp2[0] = temp2[0] + mWidth / 2;
-        temp2[1] = -temp2[1] + mWidth / 2;
         Log.d(TAG, String.format("-- Output point = %.4f %.4f %.4f", temp2[0], temp2[1], temp2[2]));
         output.set(temp2);
     }

@@ -3,7 +3,7 @@ package com.zibilal.arthesis2.app.data;
 /**
  * Created by bmuhamm on 6/2/14.
  */
-public class Geonames {
+public class GooglePlace {
 
     private String id;
     private String name;

@@ -220,7 +220,7 @@ public class SensorsActivity extends Activity implements SensorEventListener, Lo
 
         if (evt.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
         	//if (AugmentedReality.useDataSmoothing) {
-	            smooth = LowPassFilter.filter(0.5f, 1.0f, evt.values, grav);
+	            smooth = LowPassFilter.filter(0.5f, 1.0f, evt.values, grav, null);
 	            grav[0] = smooth[0];
 	            grav[1] = smooth[1];
 	            grav[2] = smooth[2];
@@ -235,7 +235,7 @@ public class SensorsActivity extends Activity implements SensorEventListener, Lo
         	ARData.setDeviceOrientationAngle(Orientation.getDeviceAngle()); */
         } else if (evt.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
         	//if (AugmentedReality.useDataSmoothing) {
-	            smooth = LowPassFilter.filter(2.0f, 4.0f, evt.values, mag);
+	            smooth = LowPassFilter.filter(2.0f, 4.0f, evt.values, mag, null);
 	            mag[0] = smooth[0];
 	            mag[1] = smooth[1];
 	            mag[2] = smooth[2];

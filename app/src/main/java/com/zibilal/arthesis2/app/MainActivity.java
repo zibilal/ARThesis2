@@ -40,6 +40,7 @@ public class MainActivity extends Activity {
     private void init(){
         objects = new ArrayList<ActivityObjects>();
         objects.add(new ActivityObjects("ARActivity", ARActivity.class));
+        objects.add(new ActivityObjects("Sensor Data Test", SensorDateTest.class));
         objects.add(new ActivityObjects("SensorActivity", SensorsActivity.class));
         objects.add(new ActivityObjects("SensorActivity2", com.zibilal.arthesis2.app.outside.SensorsActivity.class));
         objects.add(new ActivityObjects("MatrixTestActivity", MatrixTestActivity.class));

@@ -93,19 +93,6 @@ public class Vector {
         this.z = zTemp;
     }
 
-    public void prod2(com.zibilal.arthesis2.app.outside.Matrix matrix) {
-        float[] farray = new float[9];
-        matrix.get(farray);
-
-        float xTemp = farray[0] * x + farray[1] * y + farray[2] * z;
-        float yTemp = farray[3] * x + farray[4] * y + farray[5] * z;
-        float zTemp = farray[6] * x + farray[7] * y + farray[8] * z;
-
-        this.x = xTemp;
-        this.y = yTemp;
-        this.z = zTemp;
-    }
-
     public float length() {
         return (float) Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
