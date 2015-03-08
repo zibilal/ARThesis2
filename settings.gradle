@@ -1,3 +1,1 @@
-include ':app', ':consumeapi'
-
-project(':consumeapi').projectDir=new File('/Users/bilalmuhammad/Documents/kuliah/Codes/android-studio/ConsumeAPI/lib')
+include ':app'
